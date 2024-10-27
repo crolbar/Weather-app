@@ -1,4 +1,5 @@
 WeatherApp
 x64
 .vs
-
+/result
+/build
