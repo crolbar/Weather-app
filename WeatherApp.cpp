@@ -7,7 +7,4 @@ int main() {
 	cout << "Hello World";
 
 	while (true); 
-	
-	
 }
-
