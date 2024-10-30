@@ -7,16 +7,19 @@ ApplicationWindow {
     color: "gray"
     visible: true
 
+    Text {
+        anchors.centerIn: parent
+        color: 'magenta'
+        font.pointSize: 20;
+        text: 'yo dumfuck the tepm is 10C'
+    }
+
     Button {
+        width: 100
+        height: 100
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         id: button
-        text: "A Special Button"
-        background: Rectangle {
-            implicitWidth: 100
-            implicitHeight: 40
-            color: button.down ? "#d6d6d6" : "#f6f6f6"
-            border.color: "#26282a"
-            border.width: 1
-            radius: 4
-        }
+        text: "a buton"
     }
 }

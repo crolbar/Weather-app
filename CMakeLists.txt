@@ -11,7 +11,7 @@ find_package(Qt6 6.5 COMPONENTS Widgets Quick Gui QuickControls2 REQUIRED)
 qt_standard_project_setup(REQUIRES 6.5)
 
 qt_add_executable(WeatherApp
-    src/main.cpp
+    WIN32 src/main.cpp # win32 to hide cmd in windows
 )
 
 qt_add_qml_module(WeatherApp
@@ -24,12 +24,6 @@ qt_add_qml_module(WeatherApp
 install(TARGETS WeatherApp
     BUNDLE  DESTINATION .
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-qt_generate_deploy_qml_app_script(
-    TARGET WeatherApp
-    OUTPUT_SCRIPT deploy_script)
-
-install(SCRIPT ${deploy_script})
 
 target_link_libraries(WeatherApp
     PRIVATE Qt6::Widgets Qt6::Quick Qt6::Gui Qt6::QuickControls2
