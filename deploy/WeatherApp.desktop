@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=WeatherApp
+GenericName=WeatherApp
+Comment=WeatherApp
+Icon=icon
+Exec=WeatherApp
+Terminal=false
+Categories=Utility;
+Keywords=computer;

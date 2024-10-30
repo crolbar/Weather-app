@@ -11,7 +11,7 @@ find_package(Qt6 6.5 COMPONENTS Widgets Quick Gui QuickControls2 REQUIRED)
 qt_standard_project_setup(REQUIRES 6.5)
 
 qt_add_executable(WeatherApp
-    src/main.cpp
+    WIN32 src/main.cpp # win32 to hide cmd in windows
 )
 
 qt_add_qml_module(WeatherApp
