@@ -1,11 +1,20 @@
-#include <iostream>
-#include "./util.cpp"
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QIcon>
 
 
-int main() {
-    std::string resp = fetch("https://jsonplaceholder.typicode.com/todos/1");
+int main(int argc, char *argv[])
+{
+    QGuiApplication app(argc, argv);
 
-    std::cout << resp + "\n";
+    QQmlApplicationEngine engine;
+    const QUrl url(QStringLiteral("qrc:/qt/qml/wa/qml/main.qml"));
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+                     &app, [url](QObject *obj, const QUrl &objUrl) {
+        if (!obj && url == objUrl)
+            QCoreApplication::exit(-1);
+    }, Qt::QueuedConnection);
+    engine.load(url);
 
-    return 0;
+    return app.exec();
 }

@@ -1,0 +1,105 @@
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+  project: 'WeatherApp'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: "6.5"
+
+    - name: Install FUSE
+      if: matrix.os == 'ubuntu-latest'
+      run: sudo apt-get update && sudo apt-get install -y fuse
+
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Build
+      run: |
+        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+
+    - name: Package Appimage for linux
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        cd build
+        mkdir deploy;
+        cp ../deploy/icon.png deploy/;
+        cp ../deploy/${{ env.project }}.desktop deploy/;
+        mv ${{ env.project }} deploy/;
+
+        wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage";
+
+        chmod a+x linuxdeployqt*.AppImage;
+        unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH;
+
+        mkdir -p deploy/usr/share/doc/libc6/;
+        cp /usr/share/doc/libc6/copyright deploy/usr/share/doc/libc6/copyright;
+
+        ./linuxdeployqt*.AppImage deploy/${{ env.project }}.desktop -unsupported-allow-new-glibc -bundle-non-qt-libs -extra-plugins=iconengines,imageformats -verbose=2 -qmldir=../qml -appimage;
+        mv ${{ env.project }}*.AppImage ${{ env.project }}.AppImage;
+
+    - name: Package with windeployqt for windows
+      if: matrix.os == 'windows-latest'
+      run: |
+        cd build
+        mkdir deploy
+        cp Release/* deploy
+
+        windeployqt --qmldir ../qml deploy/${{ env.project }}.exe
+        powershell Compress-Archive -Path deploy\* -DestinationPath ${{ env.project }}.zip
+
+
+    - name: Artefact Upload
+      if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.project }}-windows
+        path: |
+          ./build/${{ env.project }}.zip
+
+    - name: Artefact Upload
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.project }}-linux
+        path: |
+          ./build/${{ env.project }}.AppImage
+
+  release:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Download
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/${{ env.project }}-linux/${{ env.project }}.AppImage
+            artifacts/${{ env.project }}-windows/${{ env.project }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
